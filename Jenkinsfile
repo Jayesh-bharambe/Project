@@ -56,14 +56,13 @@ pipeline {
             }
         }
 
-        stage('Deploy to ECS') {
+        stage('Deploy to EKS') {
             steps {
                 withAWS(credentials: 'aws-creds', region: "${AWS_REGION}") {
                     sh """
-                    aws ecs update-service \
-                        --cluster prediction-cluster \
-                        --service prediction-service \
-                        --force-new-deployment
+                    aws eks update-kubeconfig --name eks-cluster --region ${AWS_REGION}
+                    kubectl set image deployment/prediction-api prediction-api=${IMAGE}
+                    kubectl rollout restart deployment/prediction-api
                     """
                 }
             }

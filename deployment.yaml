@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prediction-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: prediction-api
+  template:
+    metadata:
+      labels:
+        app: prediction-api
+    spec:
+      containers:
+      - name: prediction-api
+        image: YOUR_ECR_URI:latest
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prediction-api
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8000
+  selector:
+    app: prediction-api
